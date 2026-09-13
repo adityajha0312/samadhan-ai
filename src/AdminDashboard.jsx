@@ -95,9 +95,9 @@ function AdminDashboard() {
               <th style={{ padding: '10px' }}>Photo</th>
               <th style={{ padding: '10px' }}>Category</th>
               <th style={{ padding: '10px' }}>Priority</th>
-              <th style={{ padding: '10px' }}>Status</th>
+            
               <th style={{ padding: '10px' }}>Est. Days</th>
-              <th style={{ padding: '10px' }}>Update</th>
+              <th style={{ padding: '10px' }}>Status</th>
               <th style={{ padding: '10px' }}>Escalation</th>
             </tr>
           </thead>
@@ -127,17 +127,19 @@ function AdminDashboard() {
                 <td style={{ padding: '10px', color: priorityColor(c.priority), fontWeight: 'bold' }}>
                   {c.priority}
                 </td>
-                <td style={{ padding: '10px' }}>{statusLabel(c.status)}</td>
+                
                 <td style={{ padding: '10px' }}>{c.estimated_resolution_days}</td>
-                <td style={{ padding: '10px' }}>
-                  <select
-                    value={c.status}
-                    onChange={(e) => updateStatus(c.id, e.target.value)}
-                  >
-                    <option value="submitted">In Progress</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="resolved">Resolved</option>
-                  </select>
+               <td style={{ padding: '10px' }}>
+                  <span style={{
+                    padding: '4px 10px',
+                    borderRadius: '999px',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    background: c.status === 'resolved' ? '#16653433' : '#7c3aed33',
+                    color: c.status === 'resolved' ? '#6bcf7f' : '#c4b5fd'
+                  }}>
+                    {statusLabel(c.status)}
+                  </span>
                 </td>
                 <td style={{ padding: '10px' }}>
                   {isEscalated(c) ? (
