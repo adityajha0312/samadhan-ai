@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { supabase } from './supabaseClient'
 import AdminDashboard from './AdminDashboard'
 import TrackComplaint from './TrackComplaint'
@@ -85,6 +85,7 @@ function App() {
     description: ''
   })
   const [selectedFile, setSelectedFile] = useState(null)
+  const fileInputRef = useRef(null)
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState('')
   const [view, setView] = useState('citizen')
@@ -249,27 +250,28 @@ function App() {
               <label>Photo of the issue (optional)</label><br />
               <input
                 type="file"
-                id="photo-upload"
+                ref={fileInputRef}
                 accept="image/*"
                 onChange={handleFileChange}
-                style={{ display: 'none' }}
+                style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, overflow: 'hidden' }}
               />
-              <label
-                htmlFor="photo-upload"
+              <button
+                type="button"
+                onClick={() => fileInputRef.current.click()}
                 style={{
-                  display: 'inline-block',
+                  display: 'block',
                   width: '100%',
                   padding: '10px',
                   background: '#0f172a',
                   border: '1px solid #334155',
                   borderRadius: '6px',
-                  cursor: 'pointer',
-                  textAlign: 'center',
-                  color: '#94a3b8'
+                  color: '#94a3b8',
+                  fontWeight: 'normal',
+                  textAlign: 'center'
                 }}
               >
                 {selectedFile ? `📎 ${selectedFile.name}` : '📷 Tap to choose a photo'}
-              </label>
+              </button>
             </div>
 
             <button type="submit" disabled={submitting}>
