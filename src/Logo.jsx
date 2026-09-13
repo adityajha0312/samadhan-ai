@@ -7,8 +7,13 @@ function Logo({ size = 40 }) {
           <stop offset="100%" stopColor="#c084fc" />
         </linearGradient>
       </defs>
-      <path d="M12 2L4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3z" fill="url(#logoGrad)" />
-      <path d="M8.5 12.5l2.5 2.5 4.5-5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <polygon points="12,2 22,8 2,8" fill="url(#logoGrad)" />
+      <rect x="3" y="9" width="2.2" height="10" fill="url(#logoGrad)" />
+      <rect x="7.4" y="9" width="2.2" height="10" fill="url(#logoGrad)" />
+      <rect x="10.9" y="9" width="2.2" height="10" fill="url(#logoGrad)" />
+      <rect x="14.4" y="9" width="2.2" height="10" fill="url(#logoGrad)" />
+      <rect x="18.8" y="9" width="2.2" height="10" fill="url(#logoGrad)" />
+      <rect x="2" y="19.5" width="20" height="2" rx="0.5" fill="url(#logoGrad)" />
     </svg>
   )
 }
