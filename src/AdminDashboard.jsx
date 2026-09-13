@@ -1,13 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabaseClient'
 
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD
-
 function AdminDashboard() {
-  const [unlocked, setUnlocked] = useState(sessionStorage.getItem('dashboard_unlocked') === 'true')
-  const [passwordInput, setPasswordInput] = useState('')
-  const [passwordError, setPasswordError] = useState('')
-
   const [complaints, setComplaints] = useState([])
   const [loading, setLoading] = useState(true)
   const [copiedId, setCopiedId] = useState(null)
@@ -24,39 +18,8 @@ function AdminDashboard() {
   }
 
   useEffect(() => {
-    if (unlocked) fetchComplaints()
-  }, [unlocked])
-
-  const handleUnlock = (e) => {
-    e.preventDefault()
-    if (passwordInput === ADMIN_PASSWORD) {
-      sessionStorage.setItem('dashboard_unlocked', 'true')
-      setUnlocked(true)
-      setPasswordError('')
-    } else {
-      setPasswordError('Incorrect password')
-    }
-  }
-
-  if (!unlocked) {
-    return (
-      <div className="form-card" style={{ maxWidth: '400px' }}>
-        <h2 style={{ textAlign: 'center', marginTop: 0 }}>🔒 Staff Access</h2>
-        <form onSubmit={handleUnlock}>
-          <input
-            type="password"
-            value={passwordInput}
-            onChange={(e) => setPasswordInput(e.target.value)}
-            placeholder="Enter staff password"
-            style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
-            autoFocus
-          />
-          <button type="submit" style={{ width: '100%' }}>Unlock Dashboard</button>
-          {passwordError && <p style={{ color: '#ff6b6b', marginTop: '10px' }}>{passwordError}</p>}
-        </form>
-      </div>
-    )
-  }
+    fetchComplaints()
+  }, [])
 
   const updateStatus = async (id, newStatus) => {
     await supabase
