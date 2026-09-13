@@ -249,10 +249,27 @@ function App() {
               <label>Photo of the issue (optional)</label><br />
               <input
                 type="file"
+                id="photo-upload"
                 accept="image/*"
                 onChange={handleFileChange}
-                style={{ width: '100%', padding: '10px' }}
+                style={{ display: 'none' }}
               />
+              <label
+                htmlFor="photo-upload"
+                style={{
+                  display: 'inline-block',
+                  width: '100%',
+                  padding: '10px',
+                  background: '#0f172a',
+                  border: '1px solid #334155',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  textAlign: 'center',
+                  color: '#94a3b8'
+                }}
+              >
+                {selectedFile ? `📎 ${selectedFile.name}` : '📷 Tap to choose a photo'}
+              </label>
             </div>
 
             <button type="submit" disabled={submitting}>
