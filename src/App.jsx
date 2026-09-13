@@ -3,8 +3,8 @@ import { supabase } from './supabaseClient'
 import AdminDashboard from './AdminDashboard'
 import TrackComplaint from './TrackComplaint'
 import Landing from './Landing'
-import './App.css'
 import Logo from './Logo'
+import './App.css'
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
 
@@ -49,13 +49,30 @@ async function categorizeComplaint(description) {
   }
 }
 
+async function uploadImage(file) {
+  const fileName = `${Date.now()}-${file.name}`
+  const { error } = await supabase.storage
+    .from('complaint-images')
+    .upload(fileName, file)
+
+  if (error) throw error
+
+  const { data } = supabase.storage
+    .from('complaint-images')
+    .getPublicUrl(fileName)
+
+  return data.publicUrl
+}
+
 function App() {
   const [entered, setEntered] = useState(false)
   const [formData, setFormData] = useState({
     citizen_name: '',
     citizen_contact: '',
+    address: '',
     description: ''
   })
+  const [selectedFile, setSelectedFile] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState('')
   const [view, setView] = useState('citizen')
@@ -68,18 +85,30 @@ function App() {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
+  const handleFileChange = (e) => {
+    setSelectedFile(e.target.files[0] || null)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitting(true)
     setMessage('Analyzing complaint...')
 
     try {
+      let imageUrl = null
+      if (selectedFile) {
+        setMessage('Uploading photo...')
+        imageUrl = await uploadImage(selectedFile)
+      }
+
+      setMessage('Analyzing complaint...')
       const aiResult = await categorizeComplaint(formData.description)
 
       const { data, error } = await supabase
         .from('complaints')
         .insert([{
           ...formData,
+          image_url: imageUrl,
           category: aiResult.category,
           priority: aiResult.priority,
           estimated_resolution_days: aiResult.estimated_resolution_days
@@ -91,7 +120,9 @@ function App() {
       setMessage(
         `Complaint submitted! ID: ${data[0].id} | Category: ${aiResult.category} | Priority: ${aiResult.priority} | Est. ${aiResult.estimated_resolution_days} days`
       )
-      setFormData({ citizen_name: '', citizen_contact: '', description: '' })
+      setFormData({ citizen_name: '', citizen_contact: '', address: '', description: '' })
+      setSelectedFile(null)
+      e.target.reset()
     } catch (err) {
       console.error(err)
       setMessage('Error: ' + err.message)
@@ -164,6 +195,18 @@ function App() {
             </div>
 
             <div style={{ marginBottom: '15px' }}>
+              <label>Address / Location of the issue</label><br />
+              <input
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="e.g. Near XYZ Market, Ward 5"
+                style={{ width: '100%', padding: '10px' }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '15px' }}>
               <label>Describe your complaint</label><br />
               <textarea
                 name="description"
@@ -171,6 +214,16 @@ function App() {
                 onChange={handleChange}
                 required
                 rows="5"
+                style={{ width: '100%', padding: '10px' }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '15px' }}>
+              <label>Photo of the issue (optional)</label><br />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
                 style={{ width: '100%', padding: '10px' }}
               />
             </div>

@@ -84,6 +84,8 @@ function AdminDashboard() {
               <th style={{ padding: '10px' }}>ID</th>
               <th style={{ padding: '10px' }}>Name</th>
               <th style={{ padding: '10px' }}>Description</th>
+              <th style={{ padding: '10px' }}>Address</th>
+              <th style={{ padding: '10px' }}>Photo</th>
               <th style={{ padding: '10px' }}>Category</th>
               <th style={{ padding: '10px' }}>Priority</th>
               <th style={{ padding: '10px' }}>Status</th>
@@ -104,6 +106,14 @@ function AdminDashboard() {
                 </td>
                 <td style={{ padding: '10px' }}>{c.citizen_name}</td>
                 <td style={{ padding: '10px', maxWidth: '220px' }}>{c.description}</td>
+                <td style={{ padding: '10px', maxWidth: '150px' }}>{c.address || '—'}</td>
+                <td style={{ padding: '10px' }}>
+                  {c.image_url ? (
+                    <a href={c.image_url} target="_blank" rel="noreferrer">
+                      <img src={c.image_url} alt="complaint" style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '6px' }} />
+                    </a>
+                  ) : '—'}
+                </td>
                 <td style={{ padding: '10px' }}>{c.category}</td>
                 <td style={{ padding: '10px', color: priorityColor(c.priority), fontWeight: 'bold' }}>
                   {c.priority}

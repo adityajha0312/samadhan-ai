@@ -59,7 +59,14 @@ function TrackComplaint() {
           <p><strong>Category:</strong> {result.category || 'Pending analysis'}</p>
           <p><strong>Priority:</strong> {result.priority || 'Pending analysis'}</p>
           <p><strong>Estimated Resolution:</strong> {result.estimated_resolution_days ? `${result.estimated_resolution_days} days` : 'N/A'}</p>
+          <p><strong>Address:</strong> {result.address || 'Not provided'}</p>
           <p><strong>Description:</strong> {result.description}</p>
+          {result.image_url && (
+            <p>
+              <strong>Photo:</strong><br />
+              <img src={result.image_url} alt="complaint" style={{ maxWidth: '100%', borderRadius: '8px', marginTop: '8px' }} />
+            </p>
+          )}
           <p><strong>Submitted:</strong> {new Date(result.created_at + 'Z').toLocaleString()}</p>
         </div>
       )}
