@@ -8,7 +8,7 @@ import Logo from './Logo'
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
 
-async function categorizeComplaint(description) {
+async function callGemini(description) {
   const prompt = `Classify this citizen complaint. Categories: Roads, Water Supply, Electricity, Sanitation, Public Safety, Healthcare, Education, Other.
 Return ONLY valid JSON, no markdown, no explanation, in this exact format:
 {"category": "...", "priority": "Low|Medium|High", "estimated_resolution_days": number}
@@ -27,15 +27,26 @@ Complaint: "${description}"`
   )
 
   const data = await response.json()
-  console.log('Gemini response:', data)
+  console.log('Gemini response:', response.status, data)
 
   if (!response.ok || !data.candidates) {
-    throw new Error('AI service temporarily unavailable, please try again')
+    const reason = data?.error?.message || `HTTP ${response.status}`
+    throw new Error(reason)
   }
 
   const text = data.candidates[0].content.parts[0].text
   const cleaned = text.replace(/```json|```/g, '').trim()
   return JSON.parse(cleaned)
+}
+
+async function categorizeComplaint(description) {
+  try {
+    return await callGemini(description)
+  } catch (err) {
+    console.warn('First attempt failed, retrying in 2s:', err.message)
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+    return await callGemini(description)
+  }
 }
 
 function App() {
