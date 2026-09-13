@@ -40,12 +40,24 @@ Complaint: "${description}"`
 }
 
 async function categorizeComplaint(description) {
+  const delays = [1500, 3000, 5000]
+  let lastError
+
+  for (let attempt = 0; attempt < delays.length; attempt++) {
+    try {
+      return await callGemini(description)
+    } catch (err) {
+      lastError = err
+      console.warn(`Attempt ${attempt + 1} failed, retrying in ${delays[attempt]}ms:`, err.message)
+      await new Promise((resolve) => setTimeout(resolve, delays[attempt]))
+    }
+  }
+
   try {
     return await callGemini(description)
   } catch (err) {
-    console.warn('First attempt failed, retrying in 2s:', err.message)
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    return await callGemini(description)
+    console.error('All retries failed:', err.message)
+    throw lastError
   }
 }
 
@@ -102,24 +114,39 @@ function App() {
       }
 
       setMessage('Analyzing complaint...')
-      const aiResult = await categorizeComplaint(formData.description)
+
+      let aiResult = null
+      let aiFailed = false
+      try {
+        aiResult = await categorizeComplaint(formData.description)
+      } catch (err) {
+        console.error('AI categorization failed after retries:', err.message)
+        aiFailed = true
+      }
 
       const { data, error } = await supabase
         .from('complaints')
         .insert([{
           ...formData,
           image_url: imageUrl,
-          category: aiResult.category,
-          priority: aiResult.priority,
-          estimated_resolution_days: aiResult.estimated_resolution_days
+          category: aiResult?.category || null,
+          priority: aiResult?.priority || null,
+          estimated_resolution_days: aiResult?.estimated_resolution_days || null
         }])
         .select()
 
       if (error) throw error
 
-      setMessage(
-        `Complaint submitted! ID: ${data[0].id} | Category: ${aiResult.category} | Priority: ${aiResult.priority} | Est. ${aiResult.estimated_resolution_days} days`
-      )
+      if (aiFailed) {
+        setMessage(
+          `Complaint submitted! ID: ${data[0].id}. AI analysis is temporarily delayed — your complaint is saved and will be categorized shortly. An admin can also assign it manually.`
+        )
+      } else {
+        setMessage(
+          `Complaint submitted! ID: ${data[0].id} | Category: ${aiResult.category} | Priority: ${aiResult.priority} | Est. ${aiResult.estimated_resolution_days} days`
+        )
+      }
+
       setFormData({ citizen_name: '', citizen_contact: '', address: '', description: '' })
       setSelectedFile(null)
       e.target.reset()

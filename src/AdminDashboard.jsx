@@ -114,7 +114,9 @@ function AdminDashboard() {
                     </a>
                   ) : '—'}
                 </td>
-                <td style={{ padding: '10px' }}>{c.category}</td>
+                <td style={{ padding: '10px' }}>
+                  {c.category || <span style={{ color: '#ffd93d' }}>⏳ Pending AI</span>}
+                </td>
                 <td style={{ padding: '10px', color: priorityColor(c.priority), fontWeight: 'bold' }}>
                   {c.priority}
                 </td>
