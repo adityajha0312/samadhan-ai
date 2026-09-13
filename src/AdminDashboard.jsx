@@ -129,12 +129,14 @@ function AdminDashboard() {
                 </td>
                 
                 <td style={{ padding: '10px' }}>{c.estimated_resolution_days}</td>
-               <td style={{ padding: '10px' }}>
+               <td style={{ padding: '10px', whiteSpace: 'nowrap' }}>
                   <span style={{
-                    padding: '4px 10px',
+                    display: 'inline-block',
+                    padding: '5px 14px',
                     borderRadius: '999px',
                     fontSize: '12px',
                     fontWeight: 'bold',
+                    whiteSpace: 'nowrap',
                     background: c.status === 'resolved' ? '#16653433' : '#7c3aed33',
                     color: c.status === 'resolved' ? '#6bcf7f' : '#c4b5fd'
                   }}>
