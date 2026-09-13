@@ -4,6 +4,7 @@ import AdminDashboard from './AdminDashboard'
 import TrackComplaint from './TrackComplaint'
 import Landing from './Landing'
 import './App.css'
+import Logo from './Logo'
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
 
@@ -91,8 +92,11 @@ function App() {
   return (
     <div className="app-shell">
       <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-        <h1 style={{ marginBottom: '2px' }}>🏛️ Samadhan AI</h1>
-        <p style={{ color: '#94a3b8', marginTop: 0, fontSize: '14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+          <Logo size={32} />
+          <h1 style={{ margin: 0, color: '#f1f5f9' }}>Samadhan AI</h1>
+        </div>
+        <p style={{ color: '#94a3b8', marginTop: '6px', fontSize: '14px' }}>
           AI-Powered Citizen Grievance Management
         </p>
       </div>
