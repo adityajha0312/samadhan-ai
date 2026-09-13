@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabaseClient'
 
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD
+
 function AdminDashboard() {
+  const [unlocked, setUnlocked] = useState(sessionStorage.getItem('dashboard_unlocked') === 'true')
+  const [passwordInput, setPasswordInput] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+
   const [complaints, setComplaints] = useState([])
   const [loading, setLoading] = useState(true)
   const [copiedId, setCopiedId] = useState(null)
@@ -18,8 +24,39 @@ function AdminDashboard() {
   }
 
   useEffect(() => {
-    fetchComplaints()
-  }, [])
+    if (unlocked) fetchComplaints()
+  }, [unlocked])
+
+  const handleUnlock = (e) => {
+    e.preventDefault()
+    if (passwordInput === ADMIN_PASSWORD) {
+      sessionStorage.setItem('dashboard_unlocked', 'true')
+      setUnlocked(true)
+      setPasswordError('')
+    } else {
+      setPasswordError('Incorrect password')
+    }
+  }
+
+  if (!unlocked) {
+    return (
+      <div className="form-card" style={{ maxWidth: '400px' }}>
+        <h2 style={{ textAlign: 'center', marginTop: 0 }}>🔒 Staff Access</h2>
+        <form onSubmit={handleUnlock}>
+          <input
+            type="password"
+            value={passwordInput}
+            onChange={(e) => setPasswordInput(e.target.value)}
+            placeholder="Enter staff password"
+            style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
+            autoFocus
+          />
+          <button type="submit" style={{ width: '100%' }}>Unlock Dashboard</button>
+          {passwordError && <p style={{ color: '#ff6b6b', marginTop: '10px' }}>{passwordError}</p>}
+        </form>
+      </div>
+    )
+  }
 
   const updateStatus = async (id, newStatus) => {
     await supabase
@@ -29,9 +66,9 @@ function AdminDashboard() {
     fetchComplaints()
   }
 
-  const copyId = (id) => {
-    navigator.clipboard.writeText(id)
-    setCopiedId(id)
+  const copyId = (code) => {
+    navigator.clipboard.writeText(code)
+    setCopiedId(code)
     setTimeout(() => setCopiedId(null), 1500)
   }
 
@@ -41,6 +78,11 @@ function AdminDashboard() {
     return '#6bcf7f'
   }
 
+  const statusLabel = (status) => {
+    if (status === 'resolved') return 'Resolved'
+    return 'In Progress'
+  }
+
   const isEscalated = (c) => {
     if (c.status === 'resolved') return false
     if (!c.estimated_resolution_days || !c.created_at) return false
@@ -48,11 +90,13 @@ function AdminDashboard() {
     return daysSinceCreated > c.estimated_resolution_days
   }
 
+  const displayId = (c) => c.ref_code || c.id.slice(0, 8).toUpperCase()
+
   if (loading) return <p style={{ padding: '20px' }}>Loading complaints...</p>
 
   return (
     <div>
-      <h1 style={{ textAlign: 'center' }}>Admin Dashboard</h1>
+      <h1 style={{ textAlign: 'center' }}>Dashboard</h1>
       <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', marginBottom: '20px', flexWrap: 'wrap' }}>
         <div className="stat-card">
           <div className="stat-number">{complaints.length}</div>
@@ -63,7 +107,7 @@ function AdminDashboard() {
           <div className="stat-label">Resolved</div>
         </div>
         <div className="stat-card">
-          <div className="stat-number">{complaints.filter(c => c.status === 'in_progress').length}</div>
+          <div className="stat-number">{complaints.filter(c => c.status !== 'resolved').length}</div>
           <div className="stat-label">In Progress</div>
         </div>
         <div className="stat-card">
@@ -78,7 +122,7 @@ function AdminDashboard() {
       </div>
 
       <div style={{ overflowX: 'auto', borderRadius: '8px' }}>
-        <table style={{ width: '100%', minWidth: '850px', borderCollapse: 'collapse' }}>
+        <table style={{ width: '100%', minWidth: '900px', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '2px solid #334155', textAlign: 'left' }}>
               <th style={{ padding: '10px' }}>ID</th>
@@ -98,11 +142,11 @@ function AdminDashboard() {
             {complaints.map((c) => (
               <tr key={c.id} style={{ borderBottom: '1px solid #334155' }}>
                 <td
-                  style={{ padding: '10px', fontSize: '11px', cursor: 'pointer', color: '#94a3b8' }}
-                  title={c.id}
-                  onClick={() => copyId(c.id)}
+                  style={{ padding: '10px', fontSize: '12px', cursor: 'pointer', color: '#94a3b8', fontFamily: 'monospace', letterSpacing: '0.5px' }}
+                  title="Click to copy"
+                  onClick={() => copyId(displayId(c))}
                 >
-                  {copiedId === c.id ? 'Copied!' : c.id.slice(0, 8) + '…'}
+                  {copiedId === displayId(c) ? 'Copied!' : displayId(c)}
                 </td>
                 <td style={{ padding: '10px' }}>{c.citizen_name}</td>
                 <td style={{ padding: '10px', maxWidth: '220px' }}>{c.description}</td>
@@ -120,14 +164,14 @@ function AdminDashboard() {
                 <td style={{ padding: '10px', color: priorityColor(c.priority), fontWeight: 'bold' }}>
                   {c.priority}
                 </td>
-                <td style={{ padding: '10px' }}>{c.status}</td>
+                <td style={{ padding: '10px' }}>{statusLabel(c.status)}</td>
                 <td style={{ padding: '10px' }}>{c.estimated_resolution_days}</td>
                 <td style={{ padding: '10px' }}>
                   <select
                     value={c.status}
                     onChange={(e) => updateStatus(c.id, e.target.value)}
                   >
-                    <option value="submitted">Submitted</option>
+                    <option value="submitted">In Progress</option>
                     <option value="in_progress">In Progress</option>
                     <option value="resolved">Resolved</option>
                   </select>

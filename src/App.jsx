@@ -76,6 +76,15 @@ async function uploadImage(file) {
   return data.publicUrl
 }
 
+function generateRefCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let code = ''
+  for (let i = 0; i < 8; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)]
+  }
+  return code
+}
+
 function App() {
   const [entered, setEntered] = useState(false)
   const [formData, setFormData] = useState({
@@ -125,11 +134,15 @@ function App() {
         aiFailed = true
       }
 
+      const refCode = generateRefCode()
+
       const { data, error } = await supabase
         .from('complaints')
         .insert([{
           ...formData,
           image_url: imageUrl,
+          ref_code: refCode,
+          status: 'in_progress',
           category: aiResult?.category || null,
           priority: aiResult?.priority || null,
           estimated_resolution_days: aiResult?.estimated_resolution_days || null
@@ -140,11 +153,11 @@ function App() {
 
       if (aiFailed) {
         setMessage(
-          `Complaint submitted! ID: ${data[0].id}. AI analysis is temporarily delayed — your complaint is saved and will be categorized shortly. An admin can also assign it manually.`
+          `Complaint submitted! Your Reference Code: ${refCode}. AI analysis is temporarily delayed — your complaint is saved and will be categorized shortly.`
         )
       } else {
         setMessage(
-          `Complaint submitted! ID: ${data[0].id} | Category: ${aiResult.category} | Priority: ${aiResult.priority} | Est. ${aiResult.estimated_resolution_days} days`
+          `Complaint submitted! Your Reference Code: ${refCode} | Category: ${aiResult.category} | Priority: ${aiResult.priority} | Est. ${aiResult.estimated_resolution_days} days`
         )
       }
 
@@ -188,7 +201,7 @@ function App() {
           className={view === 'admin' ? 'active' : ''}
           onClick={() => setView('admin')}
         >
-          📊 Admin Dashboard
+          📊 Dashboard
         </button>
       </div>
 

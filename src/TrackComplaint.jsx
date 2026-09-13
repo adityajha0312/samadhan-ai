@@ -16,7 +16,7 @@ function TrackComplaint() {
     const { data, error: fetchError } = await supabase
       .from('complaints')
       .select('*')
-      .eq('id', complaintId.trim())
+      .eq('ref_code', complaintId.trim().toUpperCase())
       .single()
 
     setLoading(false)
@@ -38,7 +38,7 @@ function TrackComplaint() {
     <div style={{ maxWidth: '500px', margin: '0 auto' }}>
       <h1>Track Your Complaint</h1>
       <form onSubmit={handleTrack}>
-        <label>Enter your Complaint ID</label><br />
+        <label>Enter your Reference Code</label><br />
         <input
           type="text"
           value={complaintId}
