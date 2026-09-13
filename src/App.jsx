@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { supabase } from './supabaseClient'
 import AdminDashboard from './AdminDashboard'
 import TrackComplaint from './TrackComplaint'
+import Landing from './Landing'
 import './App.css'
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
@@ -37,6 +38,7 @@ Complaint: "${description}"`
 }
 
 function App() {
+  const [entered, setEntered] = useState(false)
   const [formData, setFormData] = useState({
     citizen_name: '',
     citizen_contact: '',
@@ -45,6 +47,10 @@ function App() {
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState('')
   const [view, setView] = useState('citizen')
+
+  if (!entered) {
+    return <Landing onEnter={() => setEntered(true)} />
+  }
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -83,7 +89,7 @@ function App() {
   }
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '20px auto', padding: '20px' }}>
+    <div className="app-shell">
       <div style={{ textAlign: 'center', marginBottom: '10px' }}>
         <h1 style={{ marginBottom: '2px' }}>🏛️ Samadhan AI</h1>
         <p style={{ color: '#94a3b8', marginTop: 0, fontSize: '14px' }}>
@@ -117,7 +123,7 @@ function App() {
       ) : view === 'track' ? (
         <TrackComplaint />
       ) : (
-        <div style={{ maxWidth: '500px', margin: '0 auto' }}>
+        <div className="form-card">
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '15px' }}>
               <label>Your Name</label><br />
@@ -127,7 +133,7 @@ function App() {
                 value={formData.citizen_name}
                 onChange={handleChange}
                 required
-                style={{ width: '100%', padding: '8px' }}
+                style={{ width: '100%', padding: '10px' }}
               />
             </div>
 
@@ -138,7 +144,7 @@ function App() {
                 name="citizen_contact"
                 value={formData.citizen_contact}
                 onChange={handleChange}
-                style={{ width: '100%', padding: '8px' }}
+                style={{ width: '100%', padding: '10px' }}
               />
             </div>
 
@@ -150,7 +156,7 @@ function App() {
                 onChange={handleChange}
                 required
                 rows="5"
-                style={{ width: '100%', padding: '8px' }}
+                style={{ width: '100%', padding: '10px' }}
               />
             </div>
 
